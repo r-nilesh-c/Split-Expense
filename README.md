@@ -1,6 +1,7 @@
 # SplitExpense
 
 A modern web application to help groups split expenses, track balances, and settle up easily. Built with React, TypeScript, Tailwind CSS, and Supabase.
+https://split-expense-rho.vercel.app
 
 ## Features
 - User authentication (Supabase Auth)
