@@ -49,7 +49,7 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense }) => {
         <div className="mb-2">
           <div className="flex items-center space-x-2 mb-1">
             <Users className="w-4 h-4 text-gray-500" />
-            <span className="text-sm font-medium text-gray-600">Split between:</span>
+            <span className="text-sm font-medium text-gray-600">Split between: </span>
           </div>
           <div className="flex flex-wrap gap-1">
             {expense.splits.map((split, index) => (
