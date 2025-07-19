@@ -47,6 +47,12 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({ groupId, members, onSe
 
 if (settlementsError) throw settlementsError
 
+      const { data: expenses, error: expensesError } = await supabase
+        .from('expenses')
+        .select('*')
+        .eq('group_id', groupId)
+
+      if (expensesError) throw expensesError
 
       // Get all expense splits for this group
       const { data: splits, error: splitsError } = await supabase
@@ -56,6 +62,8 @@ if (settlementsError) throw settlementsError
 
       if (splitsError) throw splitsError
 
+      
+
       // Calculate balances for each member
       const memberBalances = members.map(member => {
         const memberExpenses = expenses.filter(e => e.paid_by === member.user_id)
@@ -63,11 +71,21 @@ if (settlementsError) throw settlementsError
         
         const memberSplits = splits.filter(s => s.user_id === member.user_id)
         const totalOwed = memberSplits.reduce((sum, split) => sum + split.amount, 0)
-        
+
+        // Subtract paid settlements (member as debtor)
+        const paidAsDebtor = settlements
+          .filter(s => s.from_user === member.user_id)
+          .reduce((sum, s) => sum + s.amount, 0)
+
+        // Add paid settlements (member as creditor)
+        const paidAsCreditor = settlements
+          .filter(s => s.to_user === member.user_id)
+          .reduce((sum, s) => sum + s.amount, 0)
+
         return {
           userId: member.user_id,
           email: member.email,
-          balance: totalPaid - totalOwed,
+          balance: totalPaid - totalOwed + paidAsDebtor - paidAsCreditor,
           upi_qr_code_url: member.upi_qr_code_url
         }
       })
@@ -109,8 +127,52 @@ if (settlementsError) throw settlementsError
     }
   }
   const userBalance = balances.find(b => b.userId === user?.id)?.balance || 0
+  type Settlement = {
+    id: string;
+    group_id: string;
+    from_user: string;
+    to_user: string;
+    amount: number;
+    settled_at?: string;
+    status: string;
+    payment_method?: string;
+  };
+  
+  const deleteExpenseSplitsIfSettled = async (groupId: string, fromUser: string, toUser: string) => {
+    // Fetch all expenses paid by the creditor (to_user) in this group
+    const { data: expenses, error: expensesError } = await supabase
+      .from('expenses')
+      .select('id')
+      .eq('group_id', groupId)
+      .eq('paid_by', toUser);
+  
+    if (expensesError) throw expensesError;
+  
+    const expenseIds = expenses.map(e => e.id);
+  
+    // Fetch all splits owed by the debtor (from_user) to the creditor (to_user)
+    const { data: splits, error: splitsError } = await supabase
+      .from('expense_splits')
+      .select('id')
+      .in('expense_id', expenseIds)
+      .eq('user_id', fromUser);
+  
+    if (splitsError) throw splitsError;
+  
+    const splitIdsToDelete = splits.map(s => s.id);
+  
+    if (splitIdsToDelete.length > 0) {
+      const { error: deleteSplitsError } = await supabase
+        .from('expense_splits')
+        .delete()
+        .in('id', splitIdsToDelete);
+  
+      if (deleteSplitsError) throw deleteSplitsError;
+    }
+  };
 
   return (
+    
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/20">
       <h3 className="text-lg font-bold text-gray-900 mb-4">Balances</h3>
       
