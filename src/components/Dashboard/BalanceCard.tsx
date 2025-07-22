@@ -38,54 +38,37 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({ groupId, members, onSe
 
   const calculateBalances = async () => {
     try {
-      // Get all expenses for this group
-      const { data: settlements, error: settlementsError } = await supabase
-  .from('settlements')
-  .select('*')
-  .eq('group_id', groupId)
-  .eq('status', 'paid')
-
-if (settlementsError) throw settlementsError
-
-      const { data: expenses, error: expensesError } = await supabase
-        .from('expenses')
-        .select('*')
-        .eq('group_id', groupId)
-
-      if (expensesError) throw expensesError
-
-      // Get all expense splits for this group
+      // Get unsettled splits with expense information for this group
       const { data: splits, error: splitsError } = await supabase
         .from('expense_splits')
-        .select('*')
-        .in('expense_id', expenses.map(e => e.id))
+        .select(`
+          *,
+          expense:expenses!inner (
+            group_id,
+            amount,
+            paid_by
+          )
+        `)
+        .eq('settled', false)
+        .eq('expense.group_id', groupId)
 
       if (splitsError) throw splitsError
 
-      
-
-      // Calculate balances for each member
       const memberBalances = members.map(member => {
-        const memberExpenses = expenses.filter(e => e.paid_by === member.user_id)
-        const totalPaid = memberExpenses.reduce((sum, expense) => sum + expense.amount, 0)
-        
-        const memberSplits = splits.filter(s => s.user_id === member.user_id)
-        const totalOwed = memberSplits.reduce((sum, split) => sum + split.amount, 0)
+        // What they paid (from expenses)
+        const paidAmount = splits?.filter(s => 
+          s.to_user === member.user_id
+        ).reduce((sum, split) => sum + Number(split.amount), 0) || 0
 
-        // Subtract paid settlements (member as debtor)
-        const paidAsDebtor = settlements
-          .filter(s => s.from_user === member.user_id)
-          .reduce((sum, s) => sum + s.amount, 0)
-
-        // Add paid settlements (member as creditor)
-        const paidAsCreditor = settlements
-          .filter(s => s.to_user === member.user_id)
-          .reduce((sum, s) => sum + s.amount, 0)
+        // What they owe (from splits)
+        const owedAmount = splits?.filter(s => 
+          s.from_user === member.user_id
+        ).reduce((sum, split) => sum + Number(split.amount), 0) || 0
 
         return {
           userId: member.user_id,
           email: member.email,
-          balance: totalPaid - totalOwed + paidAsDebtor - paidAsCreditor,
+          balance: paidAmount - owedAmount,
           upi_qr_code_url: member.upi_qr_code_url
         }
       })
@@ -93,7 +76,7 @@ if (settlementsError) throw settlementsError
       setBalances(memberBalances)
     } catch (error) {
       console.error('Error calculating balances:', error)
-    } finally {
+    } finally{
       setLoading(false)
     }
   }

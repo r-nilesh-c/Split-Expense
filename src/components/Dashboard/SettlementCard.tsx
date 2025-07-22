@@ -24,19 +24,51 @@ interface SettlementCardProps {
 
 export const SettlementCard: React.FC<SettlementCardProps> = ({ settlement, onUpdate }) => {
   const { user } = useAuth()
-  const [showQR, setShowQR] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showQR, setShowQR] = useState(false)
 
   const isDebtor = settlement.from_user === user?.id
   const isCreditor = settlement.to_user === user?.id
 
-  const markAsPaid = async (paymentMethod: 'manual' | 'upi_qr' = 'manual') => {
+  const confirmReceived = async () => {
     setLoading(true)
     setError('')
-
     try {
       const { error: updateError } = await supabase
+        .from('settlements')
+        .update({
+          status: 'paid',
+          settled_at: new Date().toISOString()
+        })
+        .eq('id', settlement.id)
+      if (updateError) throw updateError
+      onUpdate()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const markAsPaid = async (paymentMethod: 'manual' | 'upi_qr' = 'manual') => {
+    try {
+      // First update expense_splits
+      const { error: splitError } = await supabase
+        .from('expense_splits')
+        .update({
+          settled: true,
+          settled_at: new Date().toISOString(),
+          payment_method: paymentMethod
+        })
+        .eq('from_user', settlement.from_user)
+        .eq('to_user', settlement.to_user)
+        .eq('settled', false)
+
+      if (splitError) throw splitError
+
+      // Then update settlement
+      const { error: settlementError } = await supabase
         .from('settlements')
         .update({
           status: 'paid',
@@ -45,7 +77,7 @@ export const SettlementCard: React.FC<SettlementCardProps> = ({ settlement, onUp
         })
         .eq('id', settlement.id)
 
-      if (updateError) throw updateError
+      if (settlementError) throw settlementError
 
       onUpdate()
     } catch (err: any) {
@@ -61,6 +93,34 @@ export const SettlementCard: React.FC<SettlementCardProps> = ({ settlement, onUp
       day: 'numeric',
       year: 'numeric'
     })
+  }
+
+  // Show confirm button to creditor if status is pending
+  if (settlement.status === 'pending' && isCreditor) {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium text-gray-900">
+              You are owed ${settlement.amount.toFixed(2)} from {settlement.from_user_email?.split('@')[0]}
+            </p>
+            <p className="text-sm text-gray-600">
+              Waiting for your confirmation
+            </p>
+          </div>
+          <button
+            onClick={confirmReceived}
+            disabled={loading}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50"
+          >
+            {loading ? 'Confirming...' : 'Confirm received'}
+          </button>
+        </div>
+        {error && (
+          <div className="mt-2 text-sm text-red-600">{error}</div>
+        )}
+      </div>
+    )
   }
 
   if (settlement.status === 'paid') {

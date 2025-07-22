@@ -108,10 +108,14 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
       if (expenseError) throw expenseError
 
-      // Add expense_id to splits
+      // Update the splits creation
       const splitsWithExpenseId = splits.map(split => ({
-        ...split,
         expense_id: expense.id,
+        from_user: split.user_id,  // Change from user_id to from_user
+        to_user: paidBy,          // Add to_user field
+        amount: split.amount,
+        settled: false,           // Add settled field
+        created_at: new Date().toISOString()
       }))
 
       // Insert splits

@@ -15,6 +15,17 @@ interface Expense {
   }>
 }
 
+interface ExpenseSplit {
+  expense_id: string
+  from_user: string
+  to_user: string
+  amount: number
+  settled: boolean
+  settled_at?: string
+  payment_method?: string
+  created_at: string
+}
+
 interface ExpenseCardProps {
   expense: Expense
 }
@@ -53,10 +64,10 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense }) => {
           </div>
           <div className="flex flex-wrap gap-1">
             {expense.splits.map((split, index) => (
-              <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                {split.email?.split('@')[0] || 'Unknown'}: ${split.amount.toFixed(2)}
-              </span>
-            ))}
+  <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+    {split.from_profile?.email?.split('@')[0] || 'Unknown'}: ${split.amount.toFixed(2)}
+  </span>
+))}
           </div>
         </div>
       )}

@@ -9,6 +9,13 @@ import { SettlementCard } from './SettlementCard'
 import { AddMemberModal } from './AddMemberModal'
 import { GroupSettingsModal } from './GroupSettingsModal'
 
+interface Member {
+  id: string
+  user_id: string
+  email: string
+  joined_at: string
+  upi_qr_code_url?: string
+}
 interface Group {
   id: string
   name: string
@@ -85,22 +92,30 @@ export const GroupDetail: React.FC<GroupDetailProps> = ({ group, onBack, onUpdat
 
       if (expensesError) throw expensesError
 
-      // Fetch members
+      // Fix the members query to use profiles instead of users
       const { data: membersData, error: membersError } = await supabase
-  .from('group_members')
-  .select(`
-    id,
-    user_id,
-    joined_at,
-    profiles ( email, upi_qr_code_url )
-  `)
-  .eq('group_id', group.id)
+        .from('group_members')
+        .select(`
+          id,
+          user_id,
+          joined_at,
+          profiles!inner (
+            email,
+            upi_qr_code_url
+          )
+        `)
+        .eq('group_id', group.id)
 
-if (membersError) throw membersError
+      if (membersError) throw membersError
 
-
-
-      
+      // Update data transformation to use profiles
+      const membersWithEmails = membersData.map(member => ({
+        id: member.id,
+        user_id: member.user_id,
+        email: member.profiles.email,
+        joined_at: member.joined_at,
+        upi_qr_code_url: member.profiles.upi_qr_code_url
+      }))
 
       // Get expense splits for each expense
       const expenseIds = expensesData.map(e => e.id)
@@ -108,35 +123,34 @@ if (membersError) throw membersError
   .from('expense_splits')
   .select(`
     *,
-    profiles:profiles!expense_splits_user_id_fkey(email)
+    from_profile:profiles!expense_splits_from_user_fkey(email),
+    to_profile:profiles!expense_splits_to_user_fkey(email)
   `)
   .in('expense_id', expenseIds)
 
 
       if (splitsError) throw splitsError
 
-      const membersWithEmails = membersData.map(member => ({
-  ...member,
-  email: member.profiles?.email || 'Unknown',
-  upi_qr_code_url: member.profiles?.upi_qr_code_url
-}))
-
-      // Get user emails for expenses
+      // Update the expenses mapping to use the new split structure
       const expensesWithEmails = expensesData.map(expense => {
-  const expenseSplits = splitsData
-    .filter(split => split.expense_id === expense.id)
-    .map(split => ({
-      ...split,
-      email: split.profiles?.email || 'Unknown'
-    }))
+        const expenseSplits = splitsData
+          .filter(split => split.expense_id === expense.id)
+          .map(split => ({
+            ...split,
+            from_email: split.from_profile?.email || 'Unknown',
+            to_email: split.to_profile?.email || 'Unknown'
+          }))
 
-  const paidBySplit = expenseSplits.find(split => split.user_id === expense.paid_by)
-  return {
-    ...expense,
-    paid_by_email: paidBySplit?.email || 'Unknown',
-    splits: expenseSplits
-  }
-})
+        const paidByEmail = expenseSplits.find(split => 
+          split.to_user === expense.paid_by
+        )?.to_email || 'Unknown'
+
+        return {
+          ...expense,
+          paid_by_email: paidByEmail,
+          splits: expenseSplits
+        }
+      })
 
 
       setExpenses(expensesWithEmails)
