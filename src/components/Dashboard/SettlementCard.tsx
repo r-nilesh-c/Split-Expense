@@ -52,19 +52,32 @@ export const SettlementCard: React.FC<SettlementCardProps> = ({ settlement, onUp
   }
 
   const markAsPaid = async (paymentMethod: 'manual' | 'upi_qr' = 'manual') => {
-    setLoading(true)
-    setError('')
     try {
-      const { error: updateError } = await supabase
+      // First update expense_splits
+      const { error: splitError } = await supabase
+        .from('expense_splits')
+        .update({
+          settled: true,
+          settled_at: new Date().toISOString(),
+          payment_method: paymentMethod
+        })
+        .eq('from_user', settlement.from_user)
+        .eq('to_user', settlement.to_user)
+        .eq('settled', false)
+
+      if (splitError) throw splitError
+
+      // Then update settlement
+      const { error: settlementError } = await supabase
         .from('settlements')
         .update({
-          status: 'pending', // <-- Change here
+          status: 'paid',
           payment_method: paymentMethod,
-          // Do NOT set settled_at yet
+          settled_at: new Date().toISOString()
         })
         .eq('id', settlement.id)
 
-      if (updateError) throw updateError
+      if (settlementError) throw settlementError
 
       onUpdate()
     } catch (err: any) {

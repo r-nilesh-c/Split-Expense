@@ -89,46 +89,23 @@ export type Database = {
         Row: {
           id: string
           expense_id: string
-          user_id: string
+          from_user: string
+          to_user: string
           amount: number
+          settled: boolean
+          settled_at?: string
+          payment_method?: string
+          created_at: string
         }
         Insert: {
-          id?: string
           expense_id: string
-          user_id: string
-          amount: number
-        }
-        Update: {
-          id?: string
-          expense_id?: string
-          user_id?: string
-          amount?: number
-        }
-      }
-      settlements: {
-        Row: {
-          id: string
-          group_id: string
           from_user: string
           to_user: string
           amount: number
-          settled_at: string
-        }
-        Insert: {
-          id?: string
-          group_id: string
-          from_user: string
-          to_user: string
-          amount: number
+          settled?: boolean
           settled_at?: string
-        }
-        Update: {
-          id?: string
-          group_id?: string
-          from_user?: string
-          to_user?: string
-          amount?: number
-          settled_at?: string
+          payment_method?: string
+          created_at?: string
         }
       }
     }
