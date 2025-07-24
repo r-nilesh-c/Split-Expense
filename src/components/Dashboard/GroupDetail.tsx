@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { ArrowLeft, Plus, Users, Receipt, DollarSign, Calendar, UserPlus, Settings } from 'lucide-react'
+import { ArrowLeft, Plus, Users, Receipt, Coins, Calendar, UserPlus, Settings } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 import { AddExpenseModal } from './AddExpenseModal'
@@ -301,11 +301,11 @@ export const GroupDetail: React.FC<GroupDetailProps> = ({ group, onBack, onUpdat
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Total Expenses</span>
-                    <span className="font-bold text-gray-900">${totalExpenses.toFixed(2)}</span>
+                    <span className="font-bold text-gray-900">₹{totalExpenses.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Average per person</span>
-                    <span className="font-bold text-gray-900">${averagePerPerson.toFixed(2)}</span>
+                    <span className="font-bold text-gray-900">₹{averagePerPerson.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600">Members</span>

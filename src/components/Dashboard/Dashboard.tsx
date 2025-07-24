@@ -143,7 +143,7 @@ export const Dashboard: React.FC = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Expenses</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  ${groups.reduce((sum, group) => sum + (group.total_expenses || 0), 0).toFixed(2)}
+                  ₹{groups.reduce((sum, group) => sum + (group.total_expenses || 0), 0).toFixed(2)}
                 </p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
@@ -156,7 +156,7 @@ export const Dashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Your Balance</p>
-                <p className="text-2xl font-bold text-gray-900">$0.00</p>
+                <p className="text-2xl font-bold text-gray-900">₹0.00</p>
               </div>
               <div className="p-3 bg-purple-100 rounded-full">
                 <TrendingUp className="w-6 h-6 text-purple-600" />

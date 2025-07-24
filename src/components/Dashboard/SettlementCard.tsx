@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { QrCode, Check, DollarSign, Calendar } from 'lucide-react'
+import { QrCode, Check, Coins, Calendar } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 
@@ -112,7 +112,7 @@ export const SettlementCard: React.FC<SettlementCardProps> = ({ settlement, onUp
               {settlement.from_user_email?.split('@')[0]} has marked payment as sent
             </p>
             <p className="text-sm text-gray-600">
-              ${settlement.amount.toFixed(2)} • {settlement.payment_method === 'upi_qr' ? 'Paid via UPI' : 'Manual payment'}
+              ₹{settlement.amount.toFixed(2)} • {settlement.payment_method === 'upi_qr' ? 'Paid via UPI' : 'Manual payment'}
             </p>
             <p className="text-sm text-yellow-700 mt-1">
               Please confirm if you have received this payment
@@ -147,7 +147,7 @@ export const SettlementCard: React.FC<SettlementCardProps> = ({ settlement, onUp
                 Payment marked as sent
               </p>
               <p className="text-sm text-blue-700">
-                ${settlement.amount.toFixed(2)} to {settlement.to_user_email?.split('@')[0]}
+                ₹{settlement.amount.toFixed(2)} to {settlement.to_user_email?.split('@')[0]}
               </p>
               <p className="text-sm text-blue-600 mt-1">
                 Waiting for {settlement.to_user_email?.split('@')[0]} to confirm receipt
@@ -172,7 +172,7 @@ export const SettlementCard: React.FC<SettlementCardProps> = ({ settlement, onUp
         <div className="flex items-center justify-between">
           <div>
             <p className="font-medium text-gray-900">
-              You are owed ${settlement.amount.toFixed(2)} from {settlement.from_user_email?.split('@')[0]}
+              You are owed ₹{settlement.amount.toFixed(2)} from {settlement.from_user_email?.split('@')[0]}
             </p>
             <p className="text-sm text-gray-600">
               Waiting for them to mark payment as sent
@@ -196,7 +196,7 @@ export const SettlementCard: React.FC<SettlementCardProps> = ({ settlement, onUp
             </div>
             <div>
               <p className="font-medium text-green-900">
-                {isDebtor ? 'You paid' : 'You received'} ${settlement.amount.toFixed(2)}
+                {isDebtor ? 'You paid' : 'You received'} ₹{settlement.amount.toFixed(2)}
               </p>
               <p className="text-sm text-green-700">
                 {isDebtor ? `to ${settlement.to_user_email?.split('@')[0]}` : `from ${settlement.from_user_email?.split('@')[0]}`}
@@ -221,11 +221,11 @@ export const SettlementCard: React.FC<SettlementCardProps> = ({ settlement, onUp
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-orange-100 rounded-full">
-              <DollarSign className="w-4 h-4 text-orange-600" />
+              <Coins className="w-4 h-4 text-orange-600" />
             </div>
             <div>
               <p className="font-medium text-gray-900">
-                {isDebtor ? 'You owe' : 'You are owed'} ${settlement.amount.toFixed(2)}
+                {isDebtor ? 'You owe' : 'You are owed'} ₹{settlement.amount.toFixed(2)}
               </p>
               <p className="text-sm text-gray-600">
                 {isDebtor ? `to ${settlement.to_user_email?.split('@')[0]}` : `from ${settlement.from_user_email?.split('@')[0]}`}

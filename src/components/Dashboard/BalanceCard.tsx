@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, DollarSign, QrCode, X, Check } from 'lucide-react'
+import { TrendingUp, TrendingDown, Coins, QrCode, X, Check } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 
@@ -130,7 +130,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({ groupId, members, onSe
           <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <DollarSign className="w-4 h-4 text-blue-600" />
+                <Coins className="w-4 h-4 text-blue-600" />
                 <span className="font-medium text-blue-900">Your balance</span>
               </div>
               <div className="flex items-center space-x-1">
@@ -143,7 +143,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({ groupId, members, onSe
                   userBalance > 0 ? 'text-green-600' : 
                   userBalance < 0 ? 'text-red-600' : 'text-gray-600'
                 }`}>
-                  {userBalance > 0 ? '+' : ''}${userBalance.toFixed(2)}
+                  {userBalance > 0 ? '+' : ''}₹{userBalance.toFixed(2)}
                 </span>
               </div>
             </div>
@@ -176,7 +176,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({ groupId, members, onSe
               }`}
             >
               {balance.balance > 0 ? '+' : ''}
-              ${balance.balance.toFixed(2)}
+              ₹{balance.balance.toFixed(2)}
             </span>
 
             {/* Show buttons if user owes this person money */}
@@ -232,7 +232,7 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({ groupId, members, onSe
                 />
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                Amount owed: ${balance.balance.toFixed(2)}
+                Amount owed: ₹{balance.balance.toFixed(2)}
               </p>
             </div>
           </div>
