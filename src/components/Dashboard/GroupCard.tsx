@@ -1,5 +1,5 @@
 import React from 'react'
-import { Users, DollarSign, Calendar } from 'lucide-react'
+import { Users, Coins, Calendar } from 'lucide-react'
 
 interface Group {
   id: string
@@ -49,9 +49,9 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group, onClick }) => {
             </span>
           </div>
           <div className="flex items-center space-x-2">
-            <DollarSign className="w-4 h-4 text-green-500" />
+            <Coins className="w-4 h-4 text-green-500" />
             <span className="text-sm font-medium text-green-600">
-              ${(group.total_expenses || 0).toFixed(2)}
+              ₹{(group.total_expenses || 0).toFixed(2)}
             </span>
           </div>
         </div>
@@ -69,7 +69,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({ group, onClick }) => {
             <span className={`text-sm font-medium ${
               (group.your_balance || 0) >= 0 ? 'text-green-600' : 'text-red-600'
             }`}>
-              ${Math.abs(group.your_balance || 0).toFixed(2)}
+              ₹{Math.abs(group.your_balance || 0).toFixed(2)}
               {(group.your_balance || 0) < 0 && ' owed'}
             </span>
           </div>

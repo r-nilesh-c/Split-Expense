@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, Receipt, DollarSign, Users, Calculator, Percent } from 'lucide-react'
+import { X, Receipt, Coins, Users, Calculator, Percent } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabase'
 
@@ -66,7 +66,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
           }, 0)
 
           if (Math.abs(totalCustomAmount - expenseAmount) > 0.01) {
-            throw new Error(`Custom amounts must total ${expenseAmount.toFixed(2)}`)
+            throw new Error(`Custom amounts must total ₹${expenseAmount.toFixed(2)}`)
           }
 
           splits = selectedMembers.map(memberId => ({
@@ -211,7 +211,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
               Amount *
             </label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 id="amount"
                 type="number"
@@ -370,7 +370,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                   }`}>
                     {splitMethod === 'percentage' 
                       ? `${getTotalCustomAmount().toFixed(1)}%` 
-                      : `$${getTotalCustomAmount().toFixed(2)}`
+                      : `₹${getTotalCustomAmount().toFixed(2)}`
                     }
                   </span>
                 </div>
@@ -378,7 +378,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                   <div className="flex justify-between text-sm mt-1">
                     <span className="text-gray-600">Total amount:</span>
                     <span className="font-medium text-gray-900">
-                      ${((parseFloat(amount || '0') * getTotalCustomAmount()) / 100).toFixed(2)}
+                      ₹{((parseFloat(amount || '0') * getTotalCustomAmount()) / 100).toFixed(2)}
                     </span>
                   </div>
                 )}

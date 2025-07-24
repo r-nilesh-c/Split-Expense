@@ -1,5 +1,5 @@
 import React from 'react'
-import { Calendar, DollarSign, User, Users } from 'lucide-react'
+import { Calendar, Coins, User, Users } from 'lucide-react'
 
 interface Expense {
   id: string
@@ -51,8 +51,8 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense }) => {
       <div className="flex justify-between items-start mb-2">
         <h4 className="font-medium text-gray-900">{expense.description}</h4>
         <div className="flex items-center space-x-1">
-          <DollarSign className="w-4 h-4 text-green-600" />
-          <span className="font-bold text-green-600">${expense.amount.toFixed(2)}</span>
+          <Coins className="w-4 h-4 text-green-600" />
+          <span className="font-bold text-green-600">₹{expense.amount.toFixed(2)}</span>
         </div>
       </div>
       
@@ -65,7 +65,7 @@ export const ExpenseCard: React.FC<ExpenseCardProps> = ({ expense }) => {
           <div className="flex flex-wrap gap-1">
             {expense.splits.map((split, index) => (
   <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-    {split.from_profile?.email?.split('@')[0] || 'Unknown'}: ${split.amount.toFixed(2)}
+    {split.from_profile?.email?.split('@')[0] || 'Unknown'}: ₹{split.amount.toFixed(2)}
   </span>
 ))}
           </div>
