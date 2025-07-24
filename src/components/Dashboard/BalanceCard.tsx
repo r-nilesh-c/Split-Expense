@@ -95,7 +95,9 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({ groupId, members, onSe
           from_user: user.id,
           to_user: creditorUserId,
           amount: Math.abs(amount),
-          status: 'pending'
+          status: 'pending',
+          expense_id: null, // Explicitly set to null
+          payment_method: null // Explicitly set to null
         })
 
       if (settlementError) throw settlementError
@@ -110,49 +112,6 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({ groupId, members, onSe
     }
   }
   const userBalance = balances.find(b => b.userId === user?.id)?.balance || 0
-  type Settlement = {
-    id: string;
-    group_id: string;
-    from_user: string;
-    to_user: string;
-    amount: number;
-    settled_at?: string;
-    status: string;
-    payment_method?: string;
-  };
-  
-  const deleteExpenseSplitsIfSettled = async (groupId: string, fromUser: string, toUser: string) => {
-    // Fetch all expenses paid by the creditor (to_user) in this group
-    const { data: expenses, error: expensesError } = await supabase
-      .from('expenses')
-      .select('id')
-      .eq('group_id', groupId)
-      .eq('paid_by', toUser);
-  
-    if (expensesError) throw expensesError;
-  
-    const expenseIds = expenses.map(e => e.id);
-  
-    // Fetch all splits owed by the debtor (from_user) to the creditor (to_user)
-    const { data: splits, error: splitsError } = await supabase
-      .from('expense_splits')
-      .select('id')
-      .in('expense_id', expenseIds)
-      .eq('user_id', fromUser);
-  
-    if (splitsError) throw splitsError;
-  
-    const splitIdsToDelete = splits.map(s => s.id);
-  
-    if (splitIdsToDelete.length > 0) {
-      const { error: deleteSplitsError } = await supabase
-        .from('expense_splits')
-        .delete()
-        .in('id', splitIdsToDelete);
-  
-      if (deleteSplitsError) throw deleteSplitsError;
-    }
-  };
 
   return (
     
